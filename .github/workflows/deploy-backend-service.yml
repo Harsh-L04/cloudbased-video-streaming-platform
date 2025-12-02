@@ -125,7 +125,7 @@ jobs:
 
           # 2. UPDATE CONFIGURATION FIRST
           aws lambda update-function-code \
-            --function-name ContentMetaDataService \ 
+            --function-name ContentMetaDataService \
             --zip-file fileb://backend/content_metadata_service/deployment.zip
           
           # 3. Update Environment Variables (DynamoDB Table Name, Region)
@@ -152,12 +152,12 @@ jobs:
 
           # 2. UPDATE CONFIGURATION FIRST
           aws lambda update-function-code \
-            --function-name ManifestFileProcessor \ 
+            --function-name ManifestFileProcessor \
             --zip-file fileb://backend/manifest_file_processor/deployment.zip
           
           # 3. Update Environment Variables (DynamoDB Table Name, Region)
           aws lambda update-function-configuration \
-            --function-name ManifestFileProcessor \ 
+            --function-name ManifestFileProcessor \
             --environment "Variables={DYNAMODB_TABLE_NAME=${{ secrets.DYNAMODB_TABLE_NAME}},PROCESSED_S3_BUCKET=${{ secrets.PROCESSED_S3_BUCKET}},CLOUDFRONT_DOMAIN=${{ secrets.CLOUDFRONT_DOMAIN}}}"
 
           # 4. Clean up
@@ -184,7 +184,7 @@ jobs:
           
           # 3. Update Environment Variables (DynamoDB Table Name, Region)
           aws lambda update-function-configuration \
-            --function-name SegmentationService \ 
+            --function-name SegmentationService \
             --environment "Variables={TRANSCODING_JOB_QUEUE_URL=${{ secrets.TRANSCODING_JOB_QUEUE_URL}}}"
 
           # 4. Clean up
