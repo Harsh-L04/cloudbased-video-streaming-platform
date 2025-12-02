@@ -5,9 +5,10 @@ on:
     branches: [ main ]
     # This ensures the pipeline only runs if code in these folders changes
     paths:
-      - 'backend/upload_service/**'
-      - 'backend/contentlisting_service/**'
-      - 'backend/playback_service/**'
+      - 'backend/**'
+      # - 'backend/upload_service/**'
+      # - 'backend/contentlisting_service/**'
+      # - 'backend/playback_service/**'
 
 jobs:
   deploy:
