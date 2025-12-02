@@ -4,11 +4,11 @@ on:
   push:
     branches: [ main ]
     # This ensures the pipeline only runs if code in these folders changes
-    paths:
-      - 'backend/**'
-      # - 'backend/upload_service/**'
-      # - 'backend/contentlisting_service/**'
-      # - 'backend/playback_service/**'
+    # paths:
+    #   - 'backend/**'
+    #   # - 'backend/upload_service/**'
+    #   # - 'backend/contentlisting_service/**'
+    #   # - 'backend/playback_service/**'
 
 jobs:
   deploy:
@@ -37,22 +37,26 @@ jobs:
       - name: 4.1 Package and Deploy Upload Service
         run: |
           echo "Deploying UploadService..."
-          # A. Install dependencies (boto3) and package code
+          
+          # 1. INSTALL AND PACKAGE CODE
           pip install -r backend/upload_service/requirements.txt -t backend/upload_service/package
           cp backend/upload_service/lambda_function.py backend/upload_service/package/
           cd backend/upload_service/package
           zip -r ../deployment.zip .
           cd -
+          
+          # 2. UPDATE CONFIGURATION FIRST (Attempt to avoid conflict)
+          aws lambda update-function-configuration \
+            --function-name GeneratePresignedURL \
+            --environment "Variables={BUCKET_NAME=${{ secrets.RAWVIDEO_BUCKET_NAME}},REGION=${{ secrets.AWS_REGION}}}"
 
-          # B. Update the Lambda Code on AWS
+          # 3. UPDATE CODE
           aws lambda update-function-code \
             --function-name GeneratePresignedURL \
             --zip-file fileb://backend/upload_service/deployment.zip
           
-          # C. Update Environment Variables (e.g., BUCKET_NAME)
-          aws lambda update-function-configuration \
-            --function-name GeneratePresignedURL \
-            --environment "Variables={BUCKET_NAME=${{ secrets.RAWVIDEO_BUCKET_NAME}},REGION=${{ secrets.AWS_REGION}}}"
+          # 4. Clean up
+          rm -rf backend/upload_service/package backend/upload_service/deployment.zip
 
       # =================================================================
       # 5. DEPLOY CONTENT LISTING SERVICE (Code and Configuration)
@@ -60,22 +64,26 @@ jobs:
       - name: 5.1 Package and Deploy Content Listing Service
         run: |
           echo "Deploying ContentListingService..."
-          # A. Install dependencies and package code
+          
+          # 1. INSTALL AND PACKAGE CODE
           pip install -r backend/contentlisting_service/requirements.txt -t backend/contentlisting_service/package
           cp backend/contentlisting_service/lambda_function.py backend/contentlisting_service/package/
           cd backend/contentlisting_service/package
           zip -r ../deployment.zip .
           cd -
+          
+          # 2. UPDATE CONFIGURATION FIRST
+          aws lambda update-function-configuration \
+            --function-name ContentListingService \
+            --environment "Variables={TABLE_NAME=${{ secrets.VIDEO_METADATA_TABLE_NAME}},BUCKET_NAME=${{ secrets.RAWVIDEO_BUCKET_NAME}},REGION=${{ secrets.AWS_REGION}}}"
 
-          # B. Update the Lambda Code on AWS
+          # 3. UPDATE CODE
           aws lambda update-function-code \
             --function-name ContentListingService \
             --zip-file fileb://backend/contentlisting_service/deployment.zip
           
-          # C. Update Environment Variables (DynamoDB Table Name, Bucket Name)
-          aws lambda update-function-configuration \
-            --function-name ContentListingService \
-            --environment "Variables={TABLE_NAME=${{ secrets.VIDEO_METADATA_TABLE_NAME}},BUCKET_NAME=${{ secrets.RAWVIDEO_BUCKET_NAME}},REGION=${{ secrets.AWS_REGION}}}"
+          # 4. Clean up
+          rm -rf backend/contentlisting_service/package backend/contentlisting_service/deployment.zip
 
       # =================================================================
       # 6. DEPLOY PLAYBACK SERVICE (Code and Configuration)
@@ -83,7 +91,8 @@ jobs:
       - name: 6.1 Package and Deploy Playback Service
         run: |
           echo "Deploying PlaybackService (requires complex dependencies)..."
-          # NOTE: We use specific flags for dependencies like 'rsa' or 'cryptography'
+          
+          # 1. INSTALL AND PACKAGE CODE (using manylinux flags)
           pip install --platform manylinux2014_x86_64 --target backend/playback_service/package \
             --implementation cp --python-version 3.9 --only-binary=:all: -r backend/playback_service/requirements.txt
             
@@ -91,16 +100,19 @@ jobs:
           cd backend/playback_service/package
           zip -r ../deployment.zip .
           cd -
-
-          # B. Update the Lambda Code on AWS
-          aws lambda update-function-code \
-            --function-name userAuthenticate \
-            --zip-file fileb://backend/playback_service/deployment.zip
           
-          # C. Update Environment Variables (CDN Keys)
+          # 2. UPDATE CONFIGURATION FIRST
           aws lambda update-function-configuration \
             --function-name userAuthenticate \
             --environment "Variables={KEY_PAIR_ID=${{ secrets.KEY_PAIR_ID_PLAYBACK}},CLOUDFRONT_DOMAIN=${{ secrets.CLOUDFRONT_DOMAIN}}}"
+
+          # 3. UPDATE CODE
+          aws lambda update-function-code \
+            --function-name userAuthenticate \
+            --zip-file fileb://backend/playback_service/deployment.zip
+            
+          # 4. Clean up
+          rm -rf backend/playback_service/package backend/playback_service/deployment.zip
 
       - name: 7. Cleanup Local Artifacts
         run: |
