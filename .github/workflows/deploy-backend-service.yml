@@ -66,9 +66,9 @@ jobs:
           echo "Deploying ContentListingService..."
           
           # 1. INSTALL AND PACKAGE CODE
-          pip install -r backend/contentlisting_service/requirements.txt -t backend/contentlisting_service/package
-          cp backend/contentlisting_service/lambda_function.py backend/contentlisting_service/package/
-          cd backend/contentlisting_service/package
+          pip install -r backend/contentListing_service/requirements.txt -t backend/contentListing_service/package
+          cp backend/contentListing_service/lambda_function.py backend/contentListing_service/package/
+          cd backend/contentListing_service/package
           zip -r ../deployment.zip .
           cd -
           
@@ -80,10 +80,10 @@ jobs:
           # 3. UPDATE CODE
           aws lambda update-function-code \
             --function-name ContentListingService \
-            --zip-file fileb://backend/contentlisting_service/deployment.zip
+            --zip-file fileb://backend/contentListing_service/deployment.zip
           
           # 4. Clean up
-          rm -rf backend/contentlisting_service/package backend/contentlisting_service/deployment.zip
+          rm -rf backend/contentListing_service/package backend/contentListing_service/deployment.zip
 
       # =================================================================
       # 6. DEPLOY PLAYBACK SERVICE (Code and Configuration)
