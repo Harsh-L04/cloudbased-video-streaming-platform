@@ -3,7 +3,7 @@ import boto3
 import os
 from botocore.config import Config
 
-# Configuration
+# Configuration for AWS resources
 REGION = os.environ.get('AWS_REGION')
 TABLE_NAME = os.environ.get('VIDEO_METADATA_TABLE_NAME') # Set this in Env Vars
 BUCKET_NAME = os.environ.get('RAWVIDEO_BUCKET_NAME') # Set this in Env Vars
