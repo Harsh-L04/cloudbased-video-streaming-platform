@@ -48,7 +48,7 @@ jobs:
           # 2. UPDATE CONFIGURATION FIRST (Attempt to avoid conflict)
           aws lambda update-function-configuration \
             --function-name GeneratePresignedURL \
-            --environment "Variables={BUCKET_NAME=${{ secrets.RAWVIDEO_BUCKET_NAME}},REGION=${{ secrets.AWS_REGION}}}"
+            --environment "Variables={RAWVIDEO_BUCKET_NAME=${{ secrets.RAWVIDEO_BUCKET_NAME}},REGION=${{ secrets.AWS_REGION}}}"
 
           # 3. UPDATE CODE
           aws lambda update-function-code \
@@ -75,7 +75,7 @@ jobs:
           # 2. UPDATE CONFIGURATION FIRST
           aws lambda update-function-configuration \
             --function-name ContentListingService \
-            --environment "Variables={TABLE_NAME=${{ secrets.VIDEO_METADATA_TABLE_NAME}},BUCKET_NAME=${{ secrets.RAWVIDEO_BUCKET_NAME}},REGION=${{ secrets.AWS_REGION}}}"
+            --environment "Variables={VIDEO_METADATA_TABLE_NAME=${{ secrets.VIDEO_METADATA_TABLE_NAME}},RAWVIDEO_BUCKET_NAME=${{ secrets.RAWVIDEO_BUCKET_NAME}},REGION=${{ secrets.AWS_REGION}}}"
 
           # 3. UPDATE CODE
           aws lambda update-function-code \
@@ -104,7 +104,7 @@ jobs:
           # 2. UPDATE CONFIGURATION FIRST
           aws lambda update-function-configuration \
             --function-name userAuthenticate \
-            --environment "Variables={KEY_PAIR_ID=${{ secrets.KEY_PAIR_ID_PLAYBACK}},CLOUDFRONT_DOMAIN=${{ secrets.CLOUDFRONT_DOMAIN}}}"
+            --environment "Variables={KEY_PAIR_ID_PLAYBACK=${{ secrets.KEY_PAIR_ID_PLAYBACK}},CLOUDFRONT_DOMAIN=${{ secrets.CLOUDFRONT_DOMAIN}}}"
 
           # 3. UPDATE CODE
           aws lambda update-function-code \
